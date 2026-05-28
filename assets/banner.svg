@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-label="x — X research specialist for Claude Code">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1320"/>
+      <stop offset="0.55" stop-color="#0a0f1a"/>
+      <stop offset="1" stop-color="#050608"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="0.5" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#1d9bf0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.2" cy="0.2" r="0.8">
+      <stop offset="0" stop-color="#1d9bf0" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#1d9bf0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <rect width="1200" height="320" fill="url(#glow)"/>
+  <rect x="0.5" y="0.5" width="1199" height="319" fill="none" stroke="#1e293b" stroke-width="1"/>
+
+  <!-- big wordmark -->
+  <text x="70" y="232" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="230" font-weight="800" fill="url(#accent)" filter="url(#soft)">x</text>
+
+  <!-- title block -->
+  <text x="270" y="118" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, sans-serif" font-size="46" font-weight="800" fill="#f8fafc" letter-spacing="3">X RESEARCH SPECIALIST</text>
+  <text x="272" y="160" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, sans-serif" font-size="23" fill="#93a4bd">Real-time X.com signal, built for a Claude Code session.</text>
+
+  <!-- faux terminal -->
+  <rect x="272" y="190" width="860" height="62" rx="10" fill="#0d1526" stroke="#21304a" stroke-width="1.5"/>
+  <circle cx="294" cy="221" r="5" fill="#ff5f56"/>
+  <circle cx="312" cy="221" r="5" fill="#ffbd2e"/>
+  <circle cx="330" cy="221" r="5" fill="#27c93f"/>
+  <text x="352" y="227" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" fill="#cbd5e1">claude ▸ <tspan fill="#38bdf8" font-weight="700">x research</tspan> <tspan fill="#a3e3a0">"what are devs saying about &lt;topic&gt; right now"</tspan></text>
+
+  <!-- footer chips -->
+  <text x="272" y="288" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" fill="#5b6b86">Bun · TypeScript · X API v2 · pay-per-use · scored · cited · token-safe</text>
+</svg>

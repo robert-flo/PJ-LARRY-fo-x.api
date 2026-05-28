@@ -1,0 +1,26 @@
+{
+  "name": "x.api",
+  "version": "0.1.0",
+  "description": "X research specialist CLI for AI coworkers",
+  "module": "src/cli.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "x": "src/cli.ts"
+  },
+  "scripts": {
+    "x": "bun run src/cli.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@xdevplatform/xdk": "^0.5.0",
+    "yaml": "^2.9.0"
+  }
+}
