@@ -11,10 +11,9 @@ import {
 import {
   credState,
   getBearer,
-  getUserToken,
   BEARER_ENV_HINT,
-  USER_TOKEN_ENV_HINT,
 } from "../lib/config.ts";
+import { getValidUserAccessToken } from "../lib/userauth.ts";
 import { PRICING } from "../lib/cost.ts";
 
 const TWEET_FIELDS = [
@@ -145,31 +144,35 @@ export class OfficialProvider implements XProvider {
     return new Client({ bearerToken: token });
   }
 
-  private userClient(): Client {
-    const token = getUserToken();
-    if (!token) {
-      throw new ProviderError(
-        "Owned reads (mentions/bookmarks) need an OAuth2 user-context token.",
-        `Set ${USER_TOKEN_ENV_HINT} with scopes tweet.read + users.read + bookmark.read.`,
-      );
-    }
+  // Resolves a valid user-context token, silently refreshing an expired one
+  // when a refresh token + client id are present (see lib/userauth.ts).
+  private async userClient(): Promise<Client> {
+    const token = await getValidUserAccessToken();
     return new Client({ accessToken: token });
   }
 
   async status(): Promise<ProviderStatus> {
     const c = credState();
+    // Owned reads work with a live token now, or anything we can refresh into
+    // one (client id + refresh token).
+    const ownedReads = c.hasUserToken || (c.hasClientId && c.hasRefreshToken);
+    const ownedDetail = ownedReads
+      ? " + user token (owned reads enabled)"
+      : c.hasClientId
+        ? " (run `x auth` to enable owned reads)"
+        : " (owned reads need `x auth` + X_API_CLIENT_ID)";
     return {
       name: this.name,
       ready: c.hasBearer,
       detail: c.hasBearer
-        ? `bearer token present${c.hasUserToken ? " + user token (owned reads enabled)" : " (owned reads need a user token)"}`
+        ? `bearer token present${ownedDetail}`
         : `no bearer token — set ${BEARER_ENV_HINT}`,
       capabilities: {
         search: c.hasBearer,
         timeline: c.hasBearer,
         userLookup: c.hasBearer,
-        mentions: c.hasUserToken,
-        bookmarks: c.hasUserToken,
+        mentions: ownedReads,
+        bookmarks: ownedReads,
       },
       readUnitCost: this.readUnitCost,
     };
@@ -233,7 +236,7 @@ export class OfficialProvider implements XProvider {
   }
 
   async mentions(opts?: { maxResults?: number }): Promise<Post[]> {
-    const client = this.userClient();
+    const client = await this.userClient();
     const me = (await client.users.getMe()) as { data?: RawUser };
     if (!me.data?.id) throw new ProviderError("Could not resolve authenticated user.");
     const res = (await client.users.getMentions(me.data.id, {
@@ -246,7 +249,7 @@ export class OfficialProvider implements XProvider {
   }
 
   async bookmarks(opts?: { maxResults?: number }): Promise<Post[]> {
-    const client = this.userClient();
+    const client = await this.userClient();
     const me = (await client.users.getMe()) as { data?: RawUser };
     if (!me.data?.id) throw new ProviderError("Could not resolve authenticated user.");
     const res = (await client.users.getBookmarks(me.data.id, {

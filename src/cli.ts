@@ -7,6 +7,7 @@ import { ProviderError } from "./providers/types.ts";
 import { cmdResearch } from "./commands/research.ts";
 import { cmdSearch, cmdTimeline, cmdUser, cmdMentions, cmdBookmarks } from "./commands/reads.ts";
 import { cmdStatus, cmdCost } from "./commands/meta.ts";
+import { cmdAuth } from "./commands/auth.ts";
 
 const VERSION = "0.1.0";
 
@@ -23,8 +24,13 @@ READS
   x search "<query>"      Single search (raw X operators or a plain phrase), scored
   x timeline <@handle>    A user's recent posts, scored
   x user <@handle>        User profile lookup
-  x mentions              Your mentions (needs OAuth2 user token)
-  x bookmarks             Your bookmarks (needs OAuth2 user token)
+  x mentions              Your mentions (needs OAuth2 user token — run \`x auth\`)
+  x bookmarks             Your bookmarks (needs OAuth2 user token — run \`x auth\`)
+
+AUTH
+  x auth                  One-time OAuth2 login that unlocks owned reads (mentions/bookmarks).
+                          Needs X_API_CLIENT_ID set; opens a browser, stores access +
+                          refresh tokens, then auto-refreshes. Tokens never printed.
 
 META
   x status                Which providers are live (no secrets shown)
@@ -138,6 +144,7 @@ async function main(): Promise<void> {
     case "user": out = await cmdUser(arg, opts); break;
     case "mentions": out = await cmdMentions(opts); break;
     case "bookmarks": out = await cmdBookmarks(opts); break;
+    case "auth": out = await cmdAuth(opts); break;
     case "status": out = await cmdStatus(opts); break;
     case "cost": out = await cmdCost(arg, opts); break;
     default:
