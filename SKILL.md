@@ -49,10 +49,30 @@ x research "<intent>" --dry-run   # same, in the research flow
 x search "<raw X query or phrase>"   # single query; supports X operators
 x timeline <@handle>                 # a user's recent posts (scored)
 x user <@handle>                     # profile lookup
-x mentions                           # your mentions   (needs user token)
-x bookmarks                          # your bookmarks  (needs user token)
+x mentions                           # your mentions   (needs `x auth`)
+x bookmarks                          # your bookmarks  (needs `x auth`)
+x auth                               # one-time OAuth2 login to enable owned reads
 x status                             # which providers are live (no secrets)
 ```
+
+## Owned-account reads (your bookmarks & mentions)
+
+`x bookmarks` and `x mentions` read the authenticated user's OWN account, which
+needs an OAuth2 user-context token, not just the app bearer. Set it up once:
+
+```
+x auth        # opens an OAuth2 PKCE flow; approve in a browser, paste the redirect back
+```
+
+- Requires `X_API_CLIENT_ID` in `~/.config/x-api/env` (from console.x.com → your
+  app → User authentication settings → OAuth 2.0; a Native App / public client
+  works with PKCE and no secret; register callback `http://127.0.0.1/callback`).
+- Scopes requested: `tweet.read users.read bookmark.read offline.access`.
+- Durable: the access token (~2h life) **auto-refreshes** via a stored refresh
+  token, so owned reads keep working without re-login. Tokens are never printed.
+- `x auth` must be run by a human in a TTY (the browser approval can't be automated).
+- NOT available: likes/favorites (X API doesn't expose them) and DMs (no scope).
+- Owned reads cost ~$0.001 each. `x status` shows whether they're enabled.
 
 ## Output contract (stable)
 - Default output is **JSON** to stdout; diagnostics go to stderr.
@@ -72,10 +92,12 @@ x status                             # which providers are live (no secrets)
   count, not the upper-bound estimate.
 
 ## Secrets — hard rules
-- The API token lives in the environment (`X_API_BEARER_TOKEN`). **Never** read,
-  print, echo, or pass it as a flag. `x` never emits it; keep it that way.
-- Never ask the user to paste their token into chat. If `x status` says a
-  provider isn't ready, tell the user to set the env var themselves.
+- All tokens live in the environment / `~/.config/x-api/env`: the app
+  `X_API_BEARER_TOKEN`, and (for owned reads) `X_API_CLIENT_ID` plus the
+  `x auth`-managed `X_API_ACCESS_TOKEN` / `X_API_REFRESH_TOKEN`. **Never** read,
+  print, echo, or pass any of them as a flag. `x` never emits them.
+- Never ask the user to paste a token into chat. If `x status` says a provider
+  isn't ready, tell the user to set the env var or run `x auth` themselves.
 
 ## Providers
 - `--provider official` (default): paid X API, stable, legit.

@@ -130,7 +130,8 @@ x status                                                # which providers are li
 | `x search "<query>"` | Single search; supports natural language or raw X operators. |
 | `x timeline <@handle>` | A user's recent public posts, scored. |
 | `x user <@handle>` | Profile lookup. |
-| `x mentions` / `x bookmarks` | Owned reads (need an OAuth2 user token). |
+| `x mentions` / `x bookmarks` | Owned reads of your own account (run `x auth` once first). |
+| `x auth` | One-time OAuth2 login that unlocks owned reads; token auto-refreshes. |
 | `x cost "<intent>"` | Estimate spend, no network, no creds. |
 | `x status` | Provider/auth health. Never prints secrets. |
 
@@ -140,13 +141,39 @@ x status                                                # which providers are li
 
 See **[SKILL.md](./SKILL.md)** for the full contract your AI agent should read.
 
+## Read your own account (bookmarks & mentions)
+
+`x search`/`x research` read public X with just the app bearer token. To read
+**your own** bookmarks and mentions you need an OAuth2 user-context token. `x auth`
+sets that up once:
+
+```bash
+# 1. In console.x.com → your app → User authentication settings:
+#    enable OAuth 2.0, app type "Native App" (public client, PKCE, no secret),
+#    callback URI http://127.0.0.1/callback, app permission Read. Copy the Client ID.
+echo "X_API_CLIENT_ID='paste-client-id'" >> ~/.config/x-api/env
+
+# 2. Run the one-time login (opens a consent URL; approve, paste the redirect back)
+x auth                      # → ✓ Authorized as @you · auto-refresh: on
+
+# 3. Read your account
+x bookmarks --md --limit 25
+x mentions --compact
+```
+
+- **Durable:** the ~2h access token auto-refreshes via a stored refresh token
+  (`offline.access` scope), so it keeps working without re-login.
+- **Machine-local:** tokens live in `~/.config/x-api/env` (gitignored). Each
+  machine runs `x auth` once. Tokens are never printed.
+- **Not available:** likes/favorites (X API doesn't expose them) and DMs.
+
 ## How it works
 
 ```
 providers/   official (X API v2 via @xdevplatform/xdk) | cookie (free, optional) → one Post shape
 brain/       portfolio → dedupe → score → synthesize   (the custom value)
 output/      json | yaml | compact | full | md
-commands/    research · search · timeline · user · mentions · bookmarks · status · cost
+commands/    research · search · timeline · user · mentions · bookmarks · auth · status · cost
 ```
 
 **Optional free reads:** install [`twitter-cli`](https://github.com/public-clis/twitter-cli) and run
