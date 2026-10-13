@@ -1,0 +1,30 @@
+# Thin caller for ADR 0024 (robert-flo/fleet).
+# Day-to-day work lands on `personal` via PRs. `upstream` is a fast-forward
+# mirror of nixfred/x.api main. Never push, PR or open issues against that upstream.
+#
+# No packages phase: this repo is not a package feed.
+#
+# `personal` is not protected, so GITHUB_TOKEN can push. If it gets protected,
+# set repo secret FORK_SYNC_PAT (contents + issues, bypass) and the reusable
+# uses it as `token`.
+
+name: Sync personal fork
+
+on:
+  schedule:
+    # 04:00 America/El_Salvador (UTC-6) -> 10:00 UTC
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    uses: robert-flo/fleet/.github/workflows/sync-personal-fork.yml@main
+    with:
+      upstream_repo: nixfred/x.api
+      upstream_branch: main
+    secrets:
+      token: ${{ secrets.FORK_SYNC_PAT }}
